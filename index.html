@@ -80,21 +80,19 @@
   /* Info Bar */
   .info-bar {
     display: flex;
-    gap: 24px;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 22px;
-    flex-wrap: wrap;
   }
 
   .info-bar .info-group {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    flex: 1;
-    min-width: 200px;
   }
 
-  .info-bar .info-group.date-group {
-    flex: 0 0 auto;
+  .info-bar .info-group .fill-input {
+    flex: 1;
   }
 
   /* Sections */
@@ -202,6 +200,92 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-left: 10px;
+  }
+
+  /* Project Type Selector */
+  .project-type-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-left: 10px;
+  }
+
+  .project-type-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+  }
+
+  .project-type-toggle:hover {
+    border-color: var(--blue);
+  }
+
+  .project-type-toggle .arrow {
+    font-size: 8px;
+    transition: transform 0.2s;
+  }
+
+  .project-type-wrapper.open .project-type-toggle .arrow {
+    transform: rotate(180deg);
+  }
+
+  .project-type-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    min-width: 180px;
+    padding: 6px 0;
+  }
+
+  .project-type-wrapper.open .project-type-dropdown {
+    display: block;
+  }
+
+  .project-type-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .project-type-option:hover {
+    background: var(--gray-100);
+  }
+
+  .project-type-option input[type="checkbox"] {
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .project-tags-display {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: 10px;
+  }
+
+  .project-tags-display .project-tag {
+    margin-left: 0;
   }
 
   /* Scope Box */
@@ -676,6 +760,12 @@
       background: transparent;
       border: 1px solid var(--gray-200);
     }
+    .project-type-toggle {
+      display: none;
+    }
+    .project-type-dropdown {
+      display: none;
+    }
     .payment-card:hover, .milestone-card:hover {
       transform: none;
       box-shadow: none;
@@ -715,7 +805,7 @@
     <div class="doc-title">Project Agreement Packet</div>
   </div>
 
-  <!-- Client Info Bar -->
+  <!-- Client Info -->
   <div class="info-bar">
     <div class="info-group">
       <span class="field-label-inline">Client:</span>
@@ -725,9 +815,9 @@
       <span class="field-label-inline">Property:</span>
       <input type="text" class="fill-input" placeholder="Project address">
     </div>
-    <div class="info-group date-group">
+    <div class="info-group">
       <span class="field-label-inline">Date:</span>
-      <input type="text" class="fill-input short" placeholder="MM/DD/YYYY">
+      <input type="text" class="fill-input" placeholder="MM/DD/YYYY">
     </div>
   </div>
 
@@ -736,7 +826,18 @@
     <div class="section-header">
       <span class="section-number">1</span>
       <span class="section-title">Final Scope of Work</span>
-      <span class="project-tag">Kitchen Remodel</span>
+      <div class="project-type-wrapper" id="projectTypeWrapper">
+        <div class="project-type-toggle" onclick="toggleProjectDropdown()">
+          <span id="projectToggleLabel">Select Project Type</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="project-type-dropdown" id="projectDropdown">
+          <label class="project-type-option"><input type="checkbox" value="Kitchen Remodel" onchange="updateProjectTags()"> Kitchen Remodel</label>
+          <label class="project-type-option"><input type="checkbox" value="Bath Remodel" onchange="updateProjectTags()"> Bath Remodel</label>
+          <label class="project-type-option"><input type="checkbox" value="Kitchen & Bath" onchange="updateProjectTags()"> Kitchen & Bath</label>
+        </div>
+      </div>
+      <div class="project-tags-display" id="projectTagsDisplay"></div>
     </div>
     <div class="section-body">
       <textarea class="scope-box" placeholder="Describe the full scope of work including demolition, installations, materials, fixtures, finishes, and any special requirements..."></textarea>
@@ -1018,6 +1119,33 @@
   document.getElementById('totalPrice').addEventListener('input', calculatePayments);
   document.querySelectorAll('.pct-input').forEach(input => {
     input.addEventListener('input', calculatePayments);
+  });
+
+  // Project type dropdown
+  function toggleProjectDropdown() {
+    document.getElementById('projectTypeWrapper').classList.toggle('open');
+  }
+
+  function updateProjectTags() {
+    const checkboxes = document.querySelectorAll('#projectDropdown input[type="checkbox"]');
+    const display = document.getElementById('projectTagsDisplay');
+    const toggleLabel = document.getElementById('projectToggleLabel');
+    const selected = [];
+
+    checkboxes.forEach(cb => {
+      if (cb.checked) selected.push(cb.value);
+    });
+
+    display.innerHTML = selected.map(s => '<span class="project-tag">' + s + '</span>').join('');
+    toggleLabel.textContent = selected.length > 0 ? selected.length + ' Selected' : 'Select Project Type';
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('projectTypeWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      wrapper.classList.remove('open');
+    }
   });
 
   // Auto-grow textarea
