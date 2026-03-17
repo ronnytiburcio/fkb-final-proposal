@@ -447,11 +447,63 @@
     font-weight: 500;
   }
 
+  .payment-desc-input {
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5px;
+    color: var(--gray-700);
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--gray-300);
+    text-align: center;
+    padding: 2px 4px;
+    outline: none;
+    width: 100%;
+    line-height: 1.3;
+  }
+
+  .payment-desc-input::placeholder {
+    color: var(--gray-300);
+  }
+
+  .payment-desc-input:focus {
+    background: rgba(46, 120, 183, 0.05);
+    border-radius: 3px;
+  }
+
   .payment-note {
     font-size: 10px;
     color: var(--gray-500);
     font-style: italic;
     margin-top: 6px;
+  }
+
+  /* Payment Count Selector */
+  .payment-count-selector {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 10px;
+  }
+
+  .payment-count-selector select {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--blue-light);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 3px 10px;
+    cursor: pointer;
+    outline: none;
+    appearance: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .payment-count-selector select:hover {
+    border-color: var(--blue);
   }
 
   /* Timeline */
@@ -766,6 +818,12 @@
     .project-type-dropdown {
       display: none;
     }
+    .payment-count-selector {
+      display: none;
+    }
+    .payment-desc-input {
+      border-bottom: none;
+    }
     .payment-card:hover, .milestone-card:hover {
       transform: none;
       box-shadow: none;
@@ -866,31 +924,18 @@
     <div class="section-header">
       <span class="section-number">3</span>
       <span class="section-title">Payment Schedule</span>
+      <div class="payment-count-selector">
+        <select id="paymentCountSelect" onchange="renderPaymentCards()">
+          <option value="2">2 Payments</option>
+          <option value="3" selected>3 Payments</option>
+          <option value="4">4 Payments</option>
+          <option value="5">5 Payments</option>
+          <option value="6">6 Payments</option>
+        </select>
+      </div>
     </div>
     <div class="section-body">
-      <div class="payment-grid">
-        <div class="payment-card">
-          <div class="payment-pct">
-            <input type="text" class="payment-input pct-input" placeholder="__%" maxlength="4" data-milestone="1">
-          </div>
-          <input type="text" class="payment-dollar dollar-display" placeholder="$0,000" data-milestone="1" readonly>
-          <div class="payment-desc">Due at<br>contract signing</div>
-        </div>
-        <div class="payment-card">
-          <div class="payment-pct">
-            <input type="text" class="payment-input pct-input" placeholder="__%" maxlength="4" data-milestone="2">
-          </div>
-          <input type="text" class="payment-dollar dollar-display" placeholder="$0,000" data-milestone="2" readonly>
-          <div class="payment-desc">Due after demolition<br>& rough plumbing/electrical</div>
-        </div>
-        <div class="payment-card">
-          <div class="payment-pct">
-            <input type="text" class="payment-input pct-input" placeholder="__%" maxlength="4" data-milestone="3">
-          </div>
-          <input type="text" class="payment-dollar dollar-display" placeholder="$0,000" data-milestone="3" readonly>
-          <div class="payment-desc">Due at<br>substantial completion</div>
-        </div>
-      </div>
+      <div class="payment-grid" id="paymentGrid"></div>
       <p class="payment-note">Failure to make timely payments may result in work stoppage. Accepted methods: check, bank transfer, or credit card.</p>
     </div>
   </div>
@@ -1117,9 +1162,53 @@
   }
 
   document.getElementById('totalPrice').addEventListener('input', calculatePayments);
-  document.querySelectorAll('.pct-input').forEach(input => {
-    input.addEventListener('input', calculatePayments);
-  });
+
+  // Dynamic payment cards
+  var paymentDescriptions = {};
+
+  function renderPaymentCards() {
+    var count = parseInt(document.getElementById('paymentCountSelect').value);
+    var grid = document.getElementById('paymentGrid');
+
+    // Save current values
+    grid.querySelectorAll('.payment-card').forEach(function(card) {
+      var m = card.querySelector('.pct-input').dataset.milestone;
+      paymentDescriptions[m] = {
+        pct: card.querySelector('.pct-input').value,
+        desc: card.querySelector('.payment-desc-input').value
+      };
+    });
+
+    var html = '';
+    for (var i = 1; i <= count; i++) {
+      var savedPct = paymentDescriptions[i] ? paymentDescriptions[i].pct : '';
+      var savedDesc = paymentDescriptions[i] ? paymentDescriptions[i].desc : '';
+      var placeholder = '';
+      if (!savedDesc) {
+        if (i === 1) placeholder = 'e.g. Due at contract signing';
+        else if (i === count) placeholder = 'e.g. Due at substantial completion';
+        else placeholder = 'e.g. Due at milestone ' + i;
+      }
+
+      html += '<div class="payment-card">'
+        + '<div class="payment-pct">'
+        + '<input type="text" class="payment-input pct-input" placeholder="__%" maxlength="4" data-milestone="' + i + '" value="' + savedPct + '">'
+        + '</div>'
+        + '<input type="text" class="payment-dollar dollar-display" placeholder="$0,000" data-milestone="' + i + '" readonly>'
+        + '<div class="payment-desc"><input type="text" class="payment-desc-input" placeholder="' + placeholder + '" value="' + savedDesc + '" data-milestone="' + i + '"></div>'
+        + '</div>';
+    }
+    grid.innerHTML = html;
+
+    // Re-bind pct input listeners
+    grid.querySelectorAll('.pct-input').forEach(function(input) {
+      input.addEventListener('input', calculatePayments);
+    });
+
+    calculatePayments();
+  }
+
+  renderPaymentCards();
 
   // Project type dropdown
   function toggleProjectDropdown() {
