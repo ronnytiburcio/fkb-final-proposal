@@ -947,19 +947,8 @@
       <span class="section-title">Estimated Timeline</span>
     </div>
     <div class="section-body">
-      <div class="timeline-dates">
-        <div class="timeline-date-group">
-          <span class="field-label-inline">Estimated Start:</span>
-          <input type="text" class="fill-input short" id="startDate" placeholder="MM/DD/YYYY">
-        </div>
-        <span class="duration-pill">~<input type="text" class="duration-input" id="durationWeeks" placeholder="__"> Weeks</span>
-        <div class="timeline-date-group">
-          <span class="field-label-inline">Estimated Completion:</span>
-          <input type="text" class="fill-input short" id="endDate" placeholder="Auto-calculated" readonly>
-        </div>
-      </div>
-
-      <p class="payment-note">Dates are estimates for planning purposes and are not guaranteed. Delays may occur due to material availability, weather, or unforeseen conditions.</p>
+      <p style="margin-bottom: 8px; font-size: 11px;">Estimated project start: <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="4–6"> weeks after signed agreement and deposit</p>
+      <p style="font-size: 11px;">Estimated project duration: approximately <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="2–3"> weeks depending on material availability and site conditions</p>
     </div>
   </div>
 
@@ -1201,41 +1190,6 @@
       wrapper.classList.remove('open');
     }
   });
-
-  // Auto-calculate end date from start date + weeks
-  function calculateEndDate() {
-    var startVal = document.getElementById('startDate').value.trim();
-    var weeksVal = parseInt(document.getElementById('durationWeeks').value);
-    var endField = document.getElementById('endDate');
-
-    if (!startVal || !weeksVal || weeksVal <= 0) {
-      endField.value = '';
-      return;
-    }
-
-    // Parse MM/DD/YYYY
-    var parts = startVal.split('/');
-    if (parts.length !== 3) { endField.value = ''; return; }
-
-    var month = parseInt(parts[0]);
-    var day = parseInt(parts[1]);
-    var year = parseInt(parts[2]);
-
-    if (!month || !day || !year || month > 12 || day > 31) { endField.value = ''; return; }
-
-    var startDate = new Date(year, month - 1, day);
-    if (isNaN(startDate.getTime())) { endField.value = ''; return; }
-
-    startDate.setDate(startDate.getDate() + (weeksVal * 7));
-
-    var mm = String(startDate.getMonth() + 1).padStart(2, '0');
-    var dd = String(startDate.getDate()).padStart(2, '0');
-    var yyyy = startDate.getFullYear();
-    endField.value = mm + '/' + dd + '/' + yyyy;
-  }
-
-  document.getElementById('startDate').addEventListener('input', calculateEndDate);
-  document.getElementById('durationWeeks').addEventListener('input', calculateEndDate);
 
   // Auto-grow textarea
   const scopeBox = document.querySelector('.scope-box');
