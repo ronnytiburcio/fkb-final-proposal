@@ -444,19 +444,30 @@
     color: var(--gray-500);
     margin-top: 6px;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .price-includes-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--gray-600);
+    letter-spacing: 0.3px;
   }
 
   /* Price Includes Selector */
   .price-includes-wrapper {
     position: relative;
     display: inline-block;
-    margin-top: 6px;
   }
 
   .price-includes-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 0;
     background: var(--blue-light);
     color: var(--blue);
     font-size: 9px;
@@ -1126,13 +1137,14 @@
         <div class="price-label">Total Project Investment</div>
         <input type="text" class="price-amount" id="totalPrice" placeholder="$0,000.00">
         <div class="price-subtext">
+          <span class="price-includes-label">Includes</span>
           <span class="price-includes-tags" id="priceIncludesTags">
             <span class="project-tag">Labor</span>
             <span class="project-tag">Materials</span>
           </span>
           <div class="price-includes-wrapper" id="priceIncludesWrapper">
             <div class="price-includes-toggle" onclick="togglePriceIncludes()">
-              Edit Includes <span class="arrow">&#9660;</span>
+              <span class="arrow">&#9660;</span>
             </div>
             <div class="price-includes-dropdown" id="priceIncludesDropdown">
               <label class="price-includes-option">
