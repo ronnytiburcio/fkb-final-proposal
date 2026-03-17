@@ -1143,7 +1143,16 @@
     });
   }
 
-  document.getElementById('totalPrice').addEventListener('input', calculatePayments);
+  // Auto-format total price with $ and commas
+  document.getElementById('totalPrice').addEventListener('input', function() {
+    var raw = this.value.replace(/[^0-9]/g, '');
+    if (raw) {
+      this.value = '$' + parseInt(raw).toLocaleString('en-US');
+    } else {
+      this.value = '';
+    }
+    calculatePayments();
+  });
 
   // Dynamic payment cards
   var paymentDescriptions = {};
