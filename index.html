@@ -80,14 +80,14 @@
   .info-bar {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     margin-bottom: 16px;
   }
 
   .info-bar .info-group {
     display: flex;
     align-items: baseline;
-    gap: 8px;
+    gap: 4px;
   }
 
   .info-bar .info-group .fill-input {
@@ -370,6 +370,8 @@
     padding: 2px 8px;
     outline: none;
     min-width: 120px;
+    width: auto;
+    max-width: 100%;
   }
 
   .scope-room-name:focus {
@@ -442,6 +444,95 @@
     color: var(--gray-500);
     margin-top: 6px;
     font-weight: 500;
+  }
+
+  /* Price Includes Selector */
+  .price-includes-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-top: 6px;
+  }
+
+  .price-includes-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+  }
+
+  .price-includes-toggle:hover {
+    border-color: var(--blue);
+  }
+
+  .price-includes-toggle .arrow {
+    font-size: 8px;
+    transition: transform 0.2s;
+  }
+
+  .price-includes-wrapper.open .price-includes-toggle .arrow {
+    transform: rotate(180deg);
+  }
+
+  .price-includes-dropdown {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    min-width: 200px;
+    padding: 6px 0;
+  }
+
+  .price-includes-wrapper.open .price-includes-dropdown {
+    display: block;
+  }
+
+  .price-includes-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .price-includes-option:hover {
+    background: var(--gray-100);
+  }
+
+  .price-includes-option input[type="checkbox"] {
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .price-includes-tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+  }
+
+  .price-includes-tags .project-tag {
+    margin-left: 0;
+    font-size: 8px;
+    padding: 2px 8px;
   }
 
   /* Payment Schedule */
@@ -933,6 +1024,12 @@
     .project-type-dropdown {
       display: none;
     }
+    .price-includes-toggle {
+      display: none;
+    }
+    .price-includes-dropdown {
+      display: none;
+    }
     .payment-count-selector {
       display: none;
     }
@@ -1028,7 +1125,31 @@
       <div class="price-card">
         <div class="price-label">Total Project Investment</div>
         <input type="text" class="price-amount" id="totalPrice" placeholder="$0,000.00">
-        <div class="price-subtext">Includes all labor, materials, and project management</div>
+        <div class="price-subtext">
+          <span class="price-includes-tags" id="priceIncludesTags">
+            <span class="project-tag">Labor</span>
+            <span class="project-tag">Materials</span>
+          </span>
+          <div class="price-includes-wrapper" id="priceIncludesWrapper">
+            <div class="price-includes-toggle" onclick="togglePriceIncludes()">
+              Edit Includes <span class="arrow">&#9660;</span>
+            </div>
+            <div class="price-includes-dropdown" id="priceIncludesDropdown">
+              <label class="price-includes-option">
+                <input type="checkbox" value="Labor" checked onchange="updatePriceIncludes()"> Labor
+              </label>
+              <label class="price-includes-option">
+                <input type="checkbox" value="Materials" checked onchange="updatePriceIncludes()"> Materials
+              </label>
+              <label class="price-includes-option">
+                <input type="checkbox" value="Project Management" onchange="updatePriceIncludes()"> Project Management
+              </label>
+              <label class="price-includes-option">
+                <input type="checkbox" value="Design" onchange="updatePriceIncludes()"> Design
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
       <p class="payment-note">This price is valid for 30 days from the date above.</p>
     </div>
@@ -1062,7 +1183,7 @@
       <span class="section-title">Estimated Timeline</span>
     </div>
     <div class="section-body">
-      <p style="margin-bottom: 8px; font-size: 11px;">Estimated project start: <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="___"> weeks after signed agreement and deposit</p>
+      <p style="margin-bottom: 4px; font-size: 11px;">Estimated project start: <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="___"> weeks after signed agreement and deposit</p>
       <p style="font-size: 11px;">Estimated project duration: approximately <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="___"> weeks depending on material availability and site conditions</p>
     </div>
   </div>
@@ -1202,6 +1323,32 @@
 
 <!-- JavaScript -->
 <script>
+  // Price Includes dropdown
+  function togglePriceIncludes() {
+    document.getElementById('priceIncludesWrapper').classList.toggle('open');
+  }
+
+  function updatePriceIncludes() {
+    var checkboxes = document.querySelectorAll('#priceIncludesDropdown input[type="checkbox"]');
+    var tagsContainer = document.getElementById('priceIncludesTags');
+    var tags = '';
+    checkboxes.forEach(function(cb) {
+      if (cb.checked) {
+        tags += '<span class="project-tag">' + cb.value + '</span>';
+      }
+    });
+    // Keep only the tag spans, preserve the wrapper after
+    tagsContainer.innerHTML = tags;
+  }
+
+  // Close price includes dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    var wrapper = document.getElementById('priceIncludesWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      wrapper.classList.remove('open');
+    }
+  });
+
   // Auto-calculate payment dollar amounts
   function parsePrice(str) {
     if (!str) return 0;
@@ -1291,6 +1438,26 @@
 
   renderPaymentCards();
 
+  // Auto-resize scope room name inputs
+  function autoResizeRoomName(input) {
+    var span = document.createElement('span');
+    span.style.visibility = 'hidden';
+    span.style.position = 'absolute';
+    span.style.whiteSpace = 'pre';
+    span.style.font = window.getComputedStyle(input).font;
+    span.style.padding = '0 8px';
+    span.textContent = input.value || input.placeholder;
+    document.body.appendChild(span);
+    var newWidth = Math.max(120, span.offsetWidth + 16);
+    input.style.width = newWidth + 'px';
+    document.body.removeChild(span);
+  }
+
+  // Bind auto-resize to existing room name inputs
+  document.querySelectorAll('.scope-room-name').forEach(function(input) {
+    input.addEventListener('input', function() { autoResizeRoomName(this); });
+  });
+
   // Scope blocks - add/remove rooms
   var scopeCount = 1;
 
@@ -1313,6 +1480,10 @@
       this.style.height = 'auto';
       this.style.height = this.scrollHeight + 'px';
     });
+
+    // Bind auto-resize on the new room name input
+    var roomInput = block.querySelector('.scope-room-name');
+    roomInput.addEventListener('input', function() { autoResizeRoomName(this); });
   }
 
   function removeScopeBlock(btn) {
@@ -1352,6 +1523,14 @@
     if (estDateInput) data.estimateDate = estDateInput.value;
 
     data.totalPrice = document.getElementById('totalPrice').value;
+
+    // Save price includes selections
+    var priceIncludes = [];
+    document.querySelectorAll('#priceIncludesDropdown input[type="checkbox"]').forEach(function(cb) {
+      if (cb.checked) priceIncludes.push(cb.value);
+    });
+    data.priceIncludes = priceIncludes;
+
     data.paymentCount = document.getElementById('paymentCountSelect').value;
 
     // Payment card values
@@ -1419,6 +1598,11 @@
           // Trigger auto-grow
           ta.style.height = 'auto';
           ta.style.height = ta.scrollHeight + 'px';
+
+          // Bind and trigger auto-resize on room name
+          var roomInput = block.querySelector('.scope-room-name');
+          roomInput.addEventListener('input', function() { autoResizeRoomName(this); });
+          autoResizeRoomName(roomInput);
         });
       }
 
@@ -1429,6 +1613,14 @@
       var estDateInput = document.getElementById('scopeContainer').parentElement.querySelector('p input');
       if (estDateInput && data.estimateDate) estDateInput.value = data.estimateDate;
       if (data.totalPrice) document.getElementById('totalPrice').value = data.totalPrice;
+
+      // Restore price includes
+      if (data.priceIncludes) {
+        document.querySelectorAll('#priceIncludesDropdown input[type="checkbox"]').forEach(function(cb) {
+          cb.checked = data.priceIncludes.indexOf(cb.value) !== -1;
+        });
+        updatePriceIncludes();
+      }
 
       // Restore payment count and cards
       if (data.paymentCount) {
