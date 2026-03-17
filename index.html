@@ -38,7 +38,6 @@
 
   .page {
     width: 8.5in;
-    min-height: 11in;
     margin: 20px auto;
     padding: 0.5in 0.7in;
     position: relative;
@@ -49,9 +48,9 @@
   /* Header */
   .header {
     text-align: center;
-    padding-bottom: 16px;
+    padding-bottom: 12px;
     border-bottom: 3px solid var(--blue);
-    margin-bottom: 22px;
+    margin-bottom: 16px;
   }
 
   .logo-area {
@@ -63,7 +62,7 @@
   }
 
   .logo-img {
-    height: 125px;
+    height: 80px;
     width: auto;
     object-fit: contain;
   }
@@ -81,8 +80,8 @@
   .info-bar {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 22px;
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
   .info-bar .info-group {
@@ -97,7 +96,7 @@
 
   /* Sections */
   .section {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .section-header {
@@ -291,7 +290,7 @@
   /* Scope Box */
   .scope-box {
     width: 100%;
-    min-height: 120px;
+    min-height: 80px;
     border: 1px solid var(--gray-200);
     background: var(--gray-100);
     border-radius: 6px;
@@ -319,9 +318,9 @@
     background: var(--blue-light);
     border: 1px solid rgba(46, 120, 183, 0.15);
     border-radius: 8px;
-    padding: 20px 24px;
+    padding: 14px 24px;
     text-align: center;
-    margin: 10px auto;
+    margin: 8px auto;
     max-width: 400px;
   }
 
@@ -818,10 +817,17 @@
   /* Print styles */
   @media print {
     body { background: white; }
-    .page { margin: 0; padding: 0.5in 0.7in; box-shadow: none; }
-    .page-2 { page-break-before: always; }
-    .action-bar { display: none !important; }
+    .page { margin: 0; padding: 0.4in 0.7in; box-shadow: none; }
+    .page-2 { padding-top: 0.4in; }
+    .page-continuation { display: none; }
     .page-divider { display: none; }
+    .action-bar { display: none !important; }
+    .section {
+      page-break-inside: avoid;
+    }
+    .signatures-section {
+      page-break-inside: avoid;
+    }
     .payment-input, .payment-dollar, .price-amount, .fill-input, .duration-input {
       border-bottom: none;
     }
@@ -967,22 +973,6 @@
       <p style="margin-bottom: 8px; font-size: 11px;">Estimated project start: <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="___"> weeks after signed agreement and deposit</p>
       <p style="font-size: 11px;">Estimated project duration: approximately <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="___"> weeks depending on material availability and site conditions</p>
     </div>
-  </div>
-
-</div>
-
-<!-- Page Divider (screen only) -->
-<div class="page-divider">Page 2 of 2</div>
-
-<!-- ============================== -->
-<!-- PAGE 2                         -->
-<!-- ============================== -->
-<div class="page page-2">
-
-  <!-- Continuation Header -->
-  <div class="page-continuation">
-    <span class="cont-title">Project Agreement Packet</span>
-    <span>Freedom Kitchens & Baths &bull; Continued</span>
   </div>
 
   <!-- Section 5: Contract Terms -->
