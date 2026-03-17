@@ -902,10 +902,22 @@
     .page-continuation { display: none; }
     .page-divider { display: none; }
     .action-bar { display: none !important; }
-    .section {
+    .section-header {
+      page-break-after: avoid;
+    }
+    .scope-block {
       page-break-inside: avoid;
     }
-    .signatures-section {
+    .price-card {
+      page-break-inside: avoid;
+    }
+    .payment-grid {
+      page-break-inside: avoid;
+    }
+    .sub-section {
+      page-break-inside: avoid;
+    }
+    .sig-row {
       page-break-inside: avoid;
     }
     .payment-input, .payment-dollar, .price-amount, .fill-input, .duration-input {
@@ -1262,9 +1274,17 @@
     }
     grid.innerHTML = html;
 
-    // Re-bind pct input listeners
+    // Re-bind pct input listeners with auto % formatting
     grid.querySelectorAll('.pct-input').forEach(function(input) {
-      input.addEventListener('input', calculatePayments);
+      input.addEventListener('input', function() {
+        var raw = this.value.replace(/[^0-9]/g, '');
+        if (raw) {
+          this.value = raw + '%';
+        } else {
+          this.value = '';
+        }
+        calculatePayments();
+      });
     });
 
     calculatePayments();
