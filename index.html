@@ -313,6 +313,86 @@
     color: var(--gray-300);
   }
 
+  /* Scope section controls */
+  .scope-add-btn, .scope-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+
+  .scope-add-btn {
+    background: var(--blue);
+    color: var(--white);
+    margin-left: 8px;
+  }
+
+  .scope-add-btn:hover {
+    background: var(--blue-dark);
+    transform: scale(1.1);
+  }
+
+  .scope-remove-btn {
+    background: #e74c3c;
+    color: var(--white);
+    margin-left: 6px;
+    font-size: 12px;
+  }
+
+  .scope-remove-btn:hover {
+    background: #c0392b;
+    transform: scale(1.1);
+  }
+
+  .scope-room-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .scope-room-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--blue-light);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 8px;
+    outline: none;
+    min-width: 120px;
+  }
+
+  .scope-room-name:focus {
+    border-color: var(--blue);
+  }
+
+  .scope-room-name::placeholder {
+    color: var(--gray-300);
+    font-weight: 400;
+  }
+
+  .scope-block {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--gray-200);
+  }
+
+  .scope-block:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
   /* Price Card */
   .price-card {
     background: var(--blue-light);
@@ -844,6 +924,13 @@
     .payment-count-selector {
       display: none;
     }
+    .scope-add-btn, .scope-remove-btn {
+      display: none;
+    }
+    .scope-room-name {
+      border: none;
+      background: transparent;
+    }
     .payment-desc-input {
       border-bottom: none;
     }
@@ -907,23 +994,17 @@
     <div class="section-header">
       <span class="section-number">1</span>
       <span class="section-title">Final Scope of Work</span>
-      <div class="project-type-wrapper" id="projectTypeWrapper">
-        <div class="project-type-toggle" onclick="toggleProjectDropdown()">
-          <span id="projectToggleLabel">Select Project Type</span>
-          <span class="arrow">&#9660;</span>
+      <button class="scope-add-btn" onclick="addScopeBlock()" title="Add another room/area">+</button>
+    </div>
+    <div class="section-body" id="scopeContainer">
+      <div class="scope-block" data-scope="1">
+        <div class="scope-room-label">
+          <input type="text" class="scope-room-name" placeholder="e.g. Kitchen, Master Bath, Hall Bath...">
         </div>
-        <div class="project-type-dropdown" id="projectDropdown">
-          <label class="project-type-option"><input type="checkbox" value="Kitchen Remodel" onchange="updateProjectTags()"> Kitchen Remodel</label>
-          <label class="project-type-option"><input type="checkbox" value="Bath Remodel" onchange="updateProjectTags()"> Bath Remodel</label>
-          <label class="project-type-option"><input type="checkbox" value="Kitchen & Bath" onchange="updateProjectTags()"> Kitchen & Bath</label>
-        </div>
+        <textarea class="scope-box" placeholder="Describe the full scope of work for this room including demolition, installations, materials, fixtures, finishes, and any special requirements..."></textarea>
       </div>
-      <div class="project-tags-display" id="projectTagsDisplay"></div>
     </div>
-    <div class="section-body">
-      <textarea class="scope-box" placeholder="Describe the full scope of work including demolition, installations, materials, fixtures, finishes, and any special requirements..."></textarea>
-      <p>Material selections and specifications per the attached estimate dated <input type="text" class="fill-input short" placeholder="MM/DD/YYYY">.</p>
-    </div>
+    <p style="padding-left: 32px; font-size: 11px; margin-top: 6px;">Material selections and specifications per the attached estimate dated <input type="text" class="fill-input short" placeholder="MM/DD/YYYY">.</p>
   </div>
 
   <!-- Section 2: Final Project Price -->
@@ -1191,73 +1272,86 @@
 
   renderPaymentCards();
 
-  // Project type dropdown
-  function toggleProjectDropdown() {
-    document.getElementById('projectTypeWrapper').classList.toggle('open');
-  }
+  // Scope blocks - add/remove rooms
+  var scopeCount = 1;
 
-  function updateProjectTags() {
-    const checkboxes = document.querySelectorAll('#projectDropdown input[type="checkbox"]');
-    const display = document.getElementById('projectTagsDisplay');
-    const toggleLabel = document.getElementById('projectToggleLabel');
-    const selected = [];
+  function addScopeBlock() {
+    scopeCount++;
+    var container = document.getElementById('scopeContainer');
+    var block = document.createElement('div');
+    block.className = 'scope-block';
+    block.dataset.scope = scopeCount;
+    block.innerHTML = '<div class="scope-room-label">'
+      + '<input type="text" class="scope-room-name" placeholder="e.g. Kitchen, Master Bath, Hall Bath...">'
+      + '<button class="scope-remove-btn" onclick="removeScopeBlock(this)" title="Remove this room">&times;</button>'
+      + '</div>'
+      + '<textarea class="scope-box" placeholder="Describe the full scope of work for this room including demolition, installations, materials, fixtures, finishes, and any special requirements..."></textarea>';
+    container.appendChild(block);
 
-    checkboxes.forEach(cb => {
-      if (cb.checked) selected.push(cb.value);
-    });
-
-    display.innerHTML = selected.map(s => '<span class="project-tag">' + s + '</span>').join('');
-    toggleLabel.textContent = selected.length > 0 ? selected.length + ' Selected' : 'Select Project Type';
-  }
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', function(e) {
-    const wrapper = document.getElementById('projectTypeWrapper');
-    if (wrapper && !wrapper.contains(e.target)) {
-      wrapper.classList.remove('open');
-    }
-  });
-
-  // Auto-grow textarea
-  const scopeBox = document.querySelector('.scope-box');
-  if (scopeBox) {
-    scopeBox.addEventListener('input', function() {
+    // Bind auto-grow on the new textarea
+    var ta = block.querySelector('.scope-box');
+    ta.addEventListener('input', function() {
       this.style.height = 'auto';
       this.style.height = this.scrollHeight + 'px';
     });
   }
 
+  function removeScopeBlock(btn) {
+    var block = btn.closest('.scope-block');
+    block.remove();
+  }
+
+  // Auto-grow all textareas
+  document.querySelectorAll('.scope-box').forEach(function(box) {
+    box.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+    });
+  });
+
   // Save form data to a local JSON file
   function saveFile() {
     var data = {};
 
-    // All text inputs
-    document.querySelectorAll('input[type="text"], textarea').forEach(function(el) {
-      var key = el.id || el.name || el.placeholder || '';
-      if (key) data['input_' + key] = el.value;
+    // Scope blocks
+    var scopes = [];
+    document.querySelectorAll('.scope-block').forEach(function(block) {
+      scopes.push({
+        room: block.querySelector('.scope-room-name').value,
+        details: block.querySelector('.scope-box').value
+      });
     });
+    data.scopes = scopes;
 
-    // Payment count
+    // Other text inputs (outside scope blocks)
+    data.clientName = document.querySelector('input[placeholder="Client full name"]').value;
+    data.property = document.querySelector('input[placeholder="Project address"]').value;
+    data.date = document.querySelector('input[placeholder="MM/DD/YYYY"]').value;
+    data.estimateDate = document.querySelector('.section-body + p input, p[style] input') ? '' : '';
+    // Get estimate date input (the one after scope container)
+    var estDateInput = document.getElementById('scopeContainer').parentElement.querySelector('p input');
+    if (estDateInput) data.estimateDate = estDateInput.value;
+
+    data.totalPrice = document.getElementById('totalPrice').value;
     data.paymentCount = document.getElementById('paymentCountSelect').value;
 
     // Payment card values
-    document.querySelectorAll('.pct-input').forEach(function(el) {
-      data['pct_' + el.dataset.milestone] = el.value;
+    var payments = [];
+    document.querySelectorAll('.payment-card').forEach(function(card) {
+      payments.push({
+        pct: card.querySelector('.pct-input').value,
+        desc: card.querySelector('.payment-desc-input').value
+      });
     });
-    document.querySelectorAll('.payment-desc-input').forEach(function(el) {
-      data['desc_' + el.dataset.milestone] = el.value;
-    });
+    data.payments = payments;
 
-    // Project type checkboxes
-    var projectTypes = [];
-    document.querySelectorAll('#projectDropdown input[type="checkbox"]').forEach(function(cb) {
-      if (cb.checked) projectTypes.push(cb.value);
-    });
-    data.projectTypes = projectTypes;
+    // Timeline inputs
+    var timelineInputs = document.querySelectorAll('.section-body input[placeholder="___"]');
+    data.startWeeks = timelineInputs[0] ? timelineInputs[0].value : '';
+    data.durationWeeks = timelineInputs[1] ? timelineInputs[1].value : '';
 
     // Get client name for filename
-    var clientInput = document.querySelector('input[placeholder="Client full name"]');
-    var clientName = clientInput && clientInput.value ? clientInput.value.replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-') : 'Unnamed';
+    var clientName = data.clientName ? data.clientName.replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-') : 'Unnamed';
 
     var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     var a = document.createElement('a');
@@ -1280,52 +1374,69 @@
     reader.onload = function(e) {
       var data = JSON.parse(e.target.result);
 
-      // Restore payment count first so cards render
+      // Restore scope blocks
+      if (data.scopes && data.scopes.length > 0) {
+        var container = document.getElementById('scopeContainer');
+        container.innerHTML = '';
+        scopeCount = 0;
+        data.scopes.forEach(function(scope, i) {
+          scopeCount++;
+          var block = document.createElement('div');
+          block.className = 'scope-block';
+          block.dataset.scope = scopeCount;
+          var removeBtn = i > 0 ? '<button class="scope-remove-btn" onclick="removeScopeBlock(this)" title="Remove this room">&times;</button>' : '';
+          block.innerHTML = '<div class="scope-room-label">'
+            + '<input type="text" class="scope-room-name" placeholder="e.g. Kitchen, Master Bath, Hall Bath..." value="' + (scope.room || '').replace(/"/g, '&quot;') + '">'
+            + removeBtn
+            + '</div>'
+            + '<textarea class="scope-box" placeholder="Describe the full scope of work for this room including demolition, installations, materials, fixtures, finishes, and any special requirements...">' + (scope.details || '') + '</textarea>';
+          container.appendChild(block);
+
+          var ta = block.querySelector('.scope-box');
+          ta.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+          });
+          // Trigger auto-grow
+          ta.style.height = 'auto';
+          ta.style.height = ta.scrollHeight + 'px';
+        });
+      }
+
+      // Restore basic fields
+      if (data.clientName) document.querySelector('input[placeholder="Client full name"]').value = data.clientName;
+      if (data.property) document.querySelector('input[placeholder="Project address"]').value = data.property;
+      if (data.date) document.querySelector('input[placeholder="MM/DD/YYYY"]').value = data.date;
+      var estDateInput = document.getElementById('scopeContainer').parentElement.querySelector('p input');
+      if (estDateInput && data.estimateDate) estDateInput.value = data.estimateDate;
+      if (data.totalPrice) document.getElementById('totalPrice').value = data.totalPrice;
+
+      // Restore payment count and cards
       if (data.paymentCount) {
         document.getElementById('paymentCountSelect').value = data.paymentCount;
         renderPaymentCards();
       }
 
-      // Restore all text inputs
-      document.querySelectorAll('input[type="text"], textarea').forEach(function(el) {
-        var key = el.id || el.name || el.placeholder || '';
-        if (key && data['input_' + key] !== undefined) {
-          el.value = data['input_' + key];
-        }
-      });
-
-      // Restore payment card values
-      document.querySelectorAll('.pct-input').forEach(function(el) {
-        if (data['pct_' + el.dataset.milestone] !== undefined) {
-          el.value = data['pct_' + el.dataset.milestone];
-        }
-      });
-      document.querySelectorAll('.payment-desc-input').forEach(function(el) {
-        if (data['desc_' + el.dataset.milestone] !== undefined) {
-          el.value = data['desc_' + el.dataset.milestone];
-        }
-      });
-
-      // Restore project type checkboxes
-      if (data.projectTypes) {
-        document.querySelectorAll('#projectDropdown input[type="checkbox"]').forEach(function(cb) {
-          cb.checked = data.projectTypes.indexOf(cb.value) !== -1;
+      // Restore payment values
+      if (data.payments) {
+        var cards = document.querySelectorAll('.payment-card');
+        data.payments.forEach(function(p, i) {
+          if (cards[i]) {
+            cards[i].querySelector('.pct-input').value = p.pct || '';
+            cards[i].querySelector('.payment-desc-input').value = p.desc || '';
+          }
         });
-        updateProjectTags();
       }
 
-      // Recalculate dollar amounts
+      // Restore timeline
+      var timelineInputs = document.querySelectorAll('.section-body input[placeholder="___"]');
+      if (timelineInputs[0] && data.startWeeks) timelineInputs[0].value = data.startWeeks;
+      if (timelineInputs[1] && data.durationWeeks) timelineInputs[1].value = data.durationWeeks;
+
       calculatePayments();
-
-      // Auto-grow textarea
-      if (scopeBox) {
-        scopeBox.style.height = 'auto';
-        scopeBox.style.height = scopeBox.scrollHeight + 'px';
-      }
     };
     reader.readAsText(file);
 
-    // Reset so same file can be opened again
     event.target.value = '';
   }
 </script>
