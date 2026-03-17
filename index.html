@@ -756,10 +756,16 @@
   }
 
   /* Print Button */
-  .print-btn {
+  .action-bar {
     position: fixed;
     bottom: 24px;
     right: 24px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+  }
+
+  .action-btn {
     background: var(--blue);
     color: var(--white);
     border: none;
@@ -771,19 +777,30 @@
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(46, 120, 183, 0.35);
     transition: all 0.2s ease;
-    z-index: 100;
     display: flex;
     align-items: center;
     gap: 8px;
   }
 
-  .print-btn:hover {
+  .action-btn:hover {
     background: var(--blue-dark);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(46, 120, 183, 0.45);
   }
 
-  .print-btn svg {
+  .action-btn.secondary {
+    background: var(--white);
+    color: var(--blue);
+    border: 2px solid var(--blue);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+
+  .action-btn.secondary:hover {
+    background: var(--blue-light);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+
+  .action-btn svg {
     width: 16px;
     height: 16px;
     fill: currentColor;
@@ -803,7 +820,7 @@
     body { background: white; }
     .page { margin: 0; padding: 0.5in 0.7in; box-shadow: none; }
     .page-2 { page-break-before: always; }
-    .print-btn { display: none !important; }
+    .action-bar { display: none !important; }
     .page-divider { display: none; }
     .payment-input, .payment-dollar, .price-amount, .fill-input, .duration-input {
       border-bottom: none;
@@ -947,8 +964,8 @@
       <span class="section-title">Estimated Timeline</span>
     </div>
     <div class="section-body">
-      <p style="margin-bottom: 8px; font-size: 11px;">Estimated project start: <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="4–6"> weeks after signed agreement and deposit</p>
-      <p style="font-size: 11px;">Estimated project duration: approximately <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="2–3"> weeks depending on material availability and site conditions</p>
+      <p style="margin-bottom: 8px; font-size: 11px;">Estimated project start: <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="___"> weeks after signed agreement and deposit</p>
+      <p style="font-size: 11px;">Estimated project duration: approximately <input type="text" class="fill-input" style="min-width: 60px; width: 60px; text-align: center;" placeholder="___"> weeks depending on material availability and site conditions</p>
     </div>
   </div>
 
@@ -1084,11 +1101,22 @@
 
 </div>
 
-<!-- Print Button -->
-<button class="print-btn" onclick="window.print()">
-  <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
-  Save / Print
-</button>
+<!-- Action Buttons -->
+<div class="action-bar">
+  <button class="action-btn secondary" onclick="openFile()">
+    <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+    Open
+  </button>
+  <button class="action-btn secondary" onclick="saveFile()">
+    <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+    Save
+  </button>
+  <button class="action-btn" onclick="window.print()">
+    <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+    Print
+  </button>
+</div>
+<input type="file" id="fileOpenInput" accept=".json" style="display:none" onchange="handleFileOpen(event)">
 
 <!-- JavaScript -->
 <script>
@@ -1198,6 +1226,108 @@
       this.style.height = 'auto';
       this.style.height = this.scrollHeight + 'px';
     });
+  }
+
+  // Save form data to a local JSON file
+  function saveFile() {
+    var data = {};
+
+    // All text inputs
+    document.querySelectorAll('input[type="text"], textarea').forEach(function(el) {
+      var key = el.id || el.name || el.placeholder || '';
+      if (key) data['input_' + key] = el.value;
+    });
+
+    // Payment count
+    data.paymentCount = document.getElementById('paymentCountSelect').value;
+
+    // Payment card values
+    document.querySelectorAll('.pct-input').forEach(function(el) {
+      data['pct_' + el.dataset.milestone] = el.value;
+    });
+    document.querySelectorAll('.payment-desc-input').forEach(function(el) {
+      data['desc_' + el.dataset.milestone] = el.value;
+    });
+
+    // Project type checkboxes
+    var projectTypes = [];
+    document.querySelectorAll('#projectDropdown input[type="checkbox"]').forEach(function(cb) {
+      if (cb.checked) projectTypes.push(cb.value);
+    });
+    data.projectTypes = projectTypes;
+
+    // Get client name for filename
+    var clientInput = document.querySelector('input[placeholder="Client full name"]');
+    var clientName = clientInput && clientInput.value ? clientInput.value.replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-') : 'Unnamed';
+
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'FKB-Proposal-' + clientName + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // Open a saved JSON file and repopulate the form
+  function openFile() {
+    document.getElementById('fileOpenInput').click();
+  }
+
+  function handleFileOpen(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var data = JSON.parse(e.target.result);
+
+      // Restore payment count first so cards render
+      if (data.paymentCount) {
+        document.getElementById('paymentCountSelect').value = data.paymentCount;
+        renderPaymentCards();
+      }
+
+      // Restore all text inputs
+      document.querySelectorAll('input[type="text"], textarea').forEach(function(el) {
+        var key = el.id || el.name || el.placeholder || '';
+        if (key && data['input_' + key] !== undefined) {
+          el.value = data['input_' + key];
+        }
+      });
+
+      // Restore payment card values
+      document.querySelectorAll('.pct-input').forEach(function(el) {
+        if (data['pct_' + el.dataset.milestone] !== undefined) {
+          el.value = data['pct_' + el.dataset.milestone];
+        }
+      });
+      document.querySelectorAll('.payment-desc-input').forEach(function(el) {
+        if (data['desc_' + el.dataset.milestone] !== undefined) {
+          el.value = data['desc_' + el.dataset.milestone];
+        }
+      });
+
+      // Restore project type checkboxes
+      if (data.projectTypes) {
+        document.querySelectorAll('#projectDropdown input[type="checkbox"]').forEach(function(cb) {
+          cb.checked = data.projectTypes.indexOf(cb.value) !== -1;
+        });
+        updateProjectTags();
+      }
+
+      // Recalculate dollar amounts
+      calculatePayments();
+
+      // Auto-grow textarea
+      if (scopeBox) {
+        scopeBox.style.height = 'auto';
+        scopeBox.style.height = scopeBox.scrollHeight + 'px';
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset so same file can be opened again
+    event.target.value = '';
   }
 </script>
 
